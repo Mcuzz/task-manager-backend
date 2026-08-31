@@ -31,3 +31,16 @@ export const completeTask = (id: number): Task => {
     task.status = 'completed';
     return task;
 }
+
+export const deleteTask = (id: number): void => {
+    const index = tasks.findIndex((task) => task.id === id);
+    if (index === -1) {
+        throw new Error(`No se encontró la tarea con id :c${id}`);
+    }
+    tasks.splice(index, 1);
+}
+
+export const listPendingTasks = (status: 'pending' = 'pending'): readonly Task[] =>
+    tasks.filter((task) => task.status === status);
+
+
