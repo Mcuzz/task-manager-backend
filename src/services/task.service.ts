@@ -17,27 +17,42 @@ export const findTaskById = (id: number): Task => {
     return task;
 };
 export const createTask = (title: unknown): Task => {
-if (typeof title !== 'string' || !title.trim()) {
-throw new AppError('El campo title es obligatorio.', 400);
-}
-const task: Task = {
-id: Math.max(0, ...tasks.map((item) => item.id)) + 1,
-title: title.trim(),
-status: 'pending',
-createdAt: new Date()
+    if (typeof title !== 'string' || !title.trim()) {
+        throw new AppError('El campo title es obligatorio.', 400);
+    }
+    const task: Task = {
+        id: Math.max(0, ...tasks.map((item) => item.id)) + 1,
+        title: title.trim(),
+        status: 'pending',
+        createdAt: new Date()
+    };
+    tasks.push(task);
+    return task;
 };
-tasks.push(task);
-return task;
+
+//funcion del desafio individual, cambiar titulo de task
+//por id.
+export const updateTaskTitle = (id: number, title: unknown): Task => {
+    const task = findTaskById(id);
+
+    if (typeof title !== 'string' || !title.trim()) {
+        throw new AppError('El campo title debe ser un texto no vacío.', 400);
+    }
+
+    task.title = title.trim();
+
+    return task;
 };
+
 export const completeTask = (id: number): Task => {
-const task = findTaskById(id);
-task.status = 'completed';
-return task;
+    const task = findTaskById(id);
+    task.status = 'completed';
+    return task;
 };
 export const deleteTask = (id: number): void => {
-const index = tasks.findIndex((item) => item.id === id);
-if (index === -1) {
-throw new AppError(`No existe una tarea con el id ${id}.`, 404);
-}
-tasks.splice(index, 1);
+    const index = tasks.findIndex((item) => item.id === id);
+    if (index === -1) {
+        throw new AppError(`No existe una tarea con el id ${id}.`, 404);
+    }
+    tasks.splice(index, 1);
 };
