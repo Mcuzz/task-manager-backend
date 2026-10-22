@@ -1,14 +1,17 @@
+
 import type { NextFunction, Request, Response } from 'express';
 import { AppError } from '../errors/app-error.js';
+import { TASK_PRIORITIES, type TaskPriority } from '../models/task.js';
 
 export const validateTaskTitle = (
     req: Request,
     res: Response,
     next: NextFunction
 ): void => {
-    const { title, description } = req.body as {
+    const { title, description, priority } = req.body as {
         title?: unknown;
         description?: unknown;
+        priority?: unknown;
     };
 
     if (typeof title !== 'string' || !title.trim()) {
@@ -43,6 +46,30 @@ export const validateTaskTitle = (
             )
         );
         return;
+    }
+
+    if (priority !== undefined) {
+        if (
+            typeof priority !== 'string' ||
+            !TASK_PRIORITIES.includes(priority as TaskPriority)
+        ) {
+            next(
+                new AppError(
+                    'La solicitud contiene datos inválidos.',
+                    422,
+                    'VALIDATION_ERROR',
+                    [
+                        {
+                            field: 'priority',
+                            message: 'Debe ser low, medium o high.'
+                        }
+                    ]
+                )
+            );
+            return;
+        }
+
+        res.locals.taskPriority = priority as TaskPriority;
     }
 
     if (description !== undefined) {
