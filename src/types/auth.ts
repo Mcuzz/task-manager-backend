@@ -1,15 +1,15 @@
 import type { User, UserRole } from '../models/user.ts';
 export const MIN_PASSWORD_CHARACTERS = 15;
 export const MAX_PASSWORD_BYTES = 72;
+
 export interface RegisterInput {
     name: string;
     email: string;
     password: string;
 }
 
-export interface RegisterRequestBody extends RegisterInput {
-    confirmPassword: string;
-}
+export type RegisterRequestBody = RegisterInput;
+
 export interface LoginInput {
     email: string;
     password: string;

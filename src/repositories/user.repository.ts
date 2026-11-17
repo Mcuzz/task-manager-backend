@@ -1,22 +1,18 @@
 import mongoose, { type HydratedDocument } from 'mongoose';
 import { AppError } from '../errors/app-error.js';
 import { UserModel, type UserPersistence, type UserRole } from '../models/user.js';
-
 export type UserDocument = HydratedDocument<UserPersistence>;
-
 export interface CreateUserRecord {
     name: string;
     email: string;
     passwordHash: string;
     role: UserRole;
 }
-
 const isDuplicateKeyError = (error: unknown): boolean =>
     typeof error === 'object'
     && error !== null
     && 'code' in error
     && error.code === 11_000;
-
 const mapPersistenceError = (error: unknown): AppError => {
     if (error instanceof AppError) return error;
     if (isDuplicateKeyError(error)) {
@@ -44,7 +40,6 @@ const mapPersistenceError = (error: unknown): AppError => {
         'DATABASE_UNAVAILABLE'
     );
 };
-
 const execute = async <T>(operation: () => Promise<T>): Promise<T> => {
     try {
         return await operation();
@@ -52,7 +47,6 @@ const execute = async <T>(operation: () => Promise<T>): Promise<T> => {
         throw mapPersistenceError(error);
     }
 };
-
 export const findUserDocumentByEmail = async (
     email: string,
     includePasswordHash = false
@@ -61,7 +55,19 @@ export const findUserDocumentByEmail = async (
     if (includePasswordHash) query.select('+passwordHash');
     return query;
 });
-
+export const findUserDocumentById = async (
+    id: string
+): Promise<UserDocument | null> => execute(async () => UserModel.findById(id));
 export const createUserDocument = async (
     data: CreateUserRecord
-): Promise<UserDocument> => execute(async () => UserModel.create(data)); 
+): Promise<UserDocument> => execute(async () => UserModel.create(data));
+export const setUserRoleByEmail = async (
+    email: string,
+    role: UserRole
+): Promise<UserDocument | null> => execute(async () =>
+    UserModel.findOneAndUpdate(
+        { email },
+        { $set: { role } },
+        { new: true, runValidators: true }
+    )
+);

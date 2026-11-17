@@ -85,6 +85,7 @@ export const validateRegister = (
 ): void => {
     const body: unknown = req.body;
     const issues: FieldIssue[] = [];
+
     if (!isRecord(body)) {
         next(new AppError(
             'Los datos de autenticación no son válidos.',
@@ -94,64 +95,47 @@ export const validateRegister = (
         ));
         return;
     }
+
     validateAllowedFields(
         body,
-        new Set(['name', 'email', 'password', 'confirmPassword']),
+        new Set(['name', 'email', 'password']),
         issues
-    ); let name: string | undefined;
+    );
+
+    let name: string | undefined;
+
     if (typeof body.name !== 'string') {
         issues.push({ field: 'name', message: 'Debe ser texto.' });
     } else {
         const normalized = body.name.trim();
+
         if (normalized.length < 2 || normalized.length > 80) {
-            issues.push({ field: 'name', message: 'Debe contener entre 2 y 80 caracteres.' });
-        } else name = normalized;
-    }
-    const email = readEmail(body, issues);
-    const password = readPassword(body, issues, true);
-
-    let confirmPassword: string | undefined;
-
-    if (typeof body.confirmPassword !== 'string' || !body.confirmPassword) {
-        issues.push({
-            field: 'confirmPassword',
-            message: 'Debe ser texto no vacío.'
-        });
-    } else {
-        confirmPassword = body.confirmPassword;
-
-        if (password !== undefined && confirmPassword !== password) {
             issues.push({
-                field: 'confirmPassword',
-                message: 'Las contraseñas no coinciden.'
+                field: 'name',
+                message: 'Debe contener entre 2 y 80 caracteres.'
             });
+        } else {
+            name = normalized;
         }
     }
+
+    const email = readEmail(body, issues);
+    const password = readPassword(body, issues, true);
 
     if (rejectInvalidInput(issues, next)) return;
 
     if (
         name === undefined ||
         email === undefined ||
-        password === undefined ||
-        confirmPassword === undefined
+        password === undefined
     ) {
         return;
     }
 
-    const requestInput: RegisterRequestBody = {
+    const registerInput: RegisterInput = {
         name,
         email,
-        password,
-        confirmPassword
-    };
-
-    const { name: validatedName, email: validatedEmail, password: validatedPassword } = requestInput;
-
-    const registerInput: RegisterInput = {
-        name: validatedName,
-        email: validatedEmail,
-        password: validatedPassword
+        password
     };
 
     res.locals.registerInput = registerInput;
