@@ -62,3 +62,13 @@ export const updateTask = (
     }, token);
 export const deleteTask = (id: string, token: string): Promise<void> =>
     apiRequest(`/api/tasks/${id}`, { method: 'DELETE' }, token);
+
+export const getTaskById = (
+  id: string,
+  token: string
+): Promise<ApiEnvelope<Task>> =>
+  apiRequest(
+    `/api/tasks/${encodeURIComponent(id)}`,
+    {},
+    token
+  );

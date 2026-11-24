@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { API_URL } from '../src/api.js';
 import { ApiHttpError, apiRequest } from '../src/api.js';
 import { deleteTask, listTasks } from '../src/task-api.js';
 import type { TaskListQuery, TaskListResponse } from '../src/types.js';
+import { getTaskById } from '../src/task-api.js';
 const query: TaskListQuery = {
     page: 2,
     limit: 5,
@@ -67,4 +69,74 @@ describe('cliente HTTP de tareas', () => {
             message: 'No tienes permisos.',
         });
     });
+});
+
+
+describe('getTaskById', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('consulta una tarea utilizando el token Bearer', async () => {
+    const task = {
+      id: 'task-123',
+      title: 'Tarea de prueba',
+      status: 'pending',
+      createdAt: '2026-11-23T10:00:00.000Z',
+      updatedAt: '2026-11-23T10:00:00.000Z',
+    };
+
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ data: task }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    );
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    const response = await getTaskById('task-123', 'token-prueba');
+
+    expect(response.data).toEqual(task);
+    expect(fetchMock).toHaveBeenCalledOnce();
+
+    const [url, options] = fetchMock.mock.calls[0];
+
+    expect(url).toBe(
+      `${API_URL}/api/tasks/task-123`
+    );
+
+    expect(options.headers.get('Authorization')).toBe(
+      'Bearer token-prueba'
+    );
+
+    expect(options.method ?? 'GET').toBe('GET');
+  });
+
+  it('devuelve un error 404 cuando la tarea no existe', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            error: {
+              code: 'TASK_NOT_FOUND',
+              message: 'La tarea no existe.',
+            },
+          }),
+          {
+            status: 404,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        )
+      )
+    );
+
+    await expect(
+      getTaskById('inexistente', 'token-prueba')
+    ).rejects.toMatchObject({
+      status: 404,
+      code: 'TASK_NOT_FOUND',
+    });
+  });
 });

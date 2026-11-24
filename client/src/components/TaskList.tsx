@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import type { Task } from "../types.js";
 interface TaskRowProps {
   task: Task;
@@ -32,6 +33,13 @@ function TaskRow({
       </div>
       <span className={`badge ${task.status}`}>{task.status}</span>
       <div className="task-actions">
+        <Link
+          to={`/tasks/${task.id}`}
+          className="secondary"
+          aria-label={`Ver detalle de ${task.title}`}
+        >
+          Ver detalle
+        </Link>
         <button
           type="button"
           className="secondary"

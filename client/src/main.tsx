@@ -1,11 +1,21 @@
+
 import { StrictMode } from 'react';
+
 import { createRoot } from 'react-dom/client';
-import App from './App.js';
+import { BrowserRouter } from 'react-router-dom';
+import AppRoutes from './AppRoutes.js';
 import './styles.css';
+
 const root = document.getElementById('root');
-if (!root) throw new Error('No se encontró el elemento raíz de React.');
+
+if (!root) {
+  throw new Error('No se encontró el elemento raíz de React.');
+}
+
 createRoot(root).render(
-<StrictMode>
-<App />
-</StrictMode>
+  <StrictMode>
+    <BrowserRouter>
+      <AppRoutes/>
+    </BrowserRouter>
+  </StrictMode>
 );

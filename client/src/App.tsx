@@ -1,3 +1,5 @@
+import { Route, Routes } from 'react-router-dom';
+import { TaskDetail } from './components/TaskDetail.js';
 import { useCallback, useEffect, useState } from 'react';
 import { ApiHttpError } from './api.js';
 import { AuthPanel } from './components/AuthPanel.js';
