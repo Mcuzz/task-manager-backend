@@ -1,6 +1,9 @@
+
 packages:
-- .
-- client
+  - .
+  - client
+  - task-manager-frontend
+
 allowBuilds:
-'@scarf/scarf': false
-esbuild: true
+  '@scarf/scarf': false
+  esbuild: true

@@ -35,14 +35,16 @@ const user: User = {
     updatedAt: new Date('2026-10-01T12:00:00.000Z')
 };
 const admin: User = { ...user, id: '67112bfe47963b2be12c43a2', role: 'admin' };
+
 const task: Task = {
     id: '67112bfe47963b2be12c43b1',
     title: 'Ejecutar pruebas automatizadas',
     status: 'pending',
+    priority: 'medium',
     createdAt: new Date('2026-10-02T12:00:00.000Z'),
-    updatedAt: new Date('2026-10-02T12:00:00.000Z'),
-    priority: 'medium'
+    updatedAt: new Date('2026-10-02T12:00:00.000Z')
 };
+
 let userToken = '';
 let adminToken = '';
 beforeEach(async () => {
@@ -78,11 +80,15 @@ describe('documentación y controles HTTP', () => {
     it('publica OpenAPI, Swagger UI y encabezados de seguridad', async () => {
         const health = await request(app).get('/health').expect(200);
         expect(health.body.data.status).toBe('up');
+        expect(health.body.data.version).toBe('1.0.0-test');
+        expect(health.body.data.environment).toBe('test');
         expect(health.headers['x-powered-by']).toBeUndefined();
         expect(health.headers['x-content-type-options']).toBe('nosniff');
         expect(typeof health.headers['x-request-id']).toBe('string');
         const specification = await request(app).get('/api-docs.json').expect(200);
         expect(specification.body.openapi).toBe('3.1.0');
+        expect(specification.body.info.version).toBe('1.0.0-test');
+        expect(specification.body.servers[0].url).toBe('http://localhost:3000');
         expect(specification.body.paths['/api/auth/me']).toBeDefined();
         expect(specification.body.components.securitySchemes.bearerAuth.scheme).toBe('bearer');
         const swagger = await request(app).get('/api-docs/').expect(200);
